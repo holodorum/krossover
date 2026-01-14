@@ -10,6 +10,24 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PythonHelperTests {
+    private fun emptyKotlinLibrary(): KotlinLibrary = KotlinLibrary(
+        classes = hashMapOf(),
+        enums = hashMapOf(),
+        nestedClasses = hashMapOf(),
+        sealedSubclasses = hashSetOf(),
+        externalTypes = emptyList(),
+    )
+
+    private fun emptyPublicApi(): PublicApi = PublicApi(
+        classes = hashMapOf(),
+        sealedSubclasses = emptySet(),
+        enums = hashMapOf(),
+        nestedClasses = hashMapOf(),
+        classHierarchy = ClassHierarchy(emptyKotlinLibrary()),
+        libName = "test",
+        rustConfig = RustConfig("jni", emptyMap()),
+    )
+
     @Test
     fun testNestedClassDefName() {
         val class1 = ClassName.notNested("com.example.Outer\$Inner")
@@ -148,5 +166,33 @@ class PythonHelperTests {
             "lambda x0: None if x0 == ffi.NULL else (lambda x0: _from_kotlin_object(MyClass, x0))(x0)",
             PythonHelper.fromKotlinConversionFn(emptyPublicApi(), type, 0)
         )
+    }
+
+    @Test
+    fun testCastParamForList() {
+        val publicApi = emptyPublicApi()
+        val itemType = KotlinType(ClassName.notNested("com.example.Item"), isNullable = false)
+        val listType = KotlinType(ClassName.list, isNullable = false, params = listOf(itemType))
+        val param = KotlinFunctionParam("items", listType)
+
+        assertEquals("_to_kotlin_list(items)", PythonHelper.castParam(publicApi, param))
+    }
+
+    @Test
+    fun testCastParamForString() {
+        val publicApi = emptyPublicApi()
+        val stringType = KotlinType(ClassName.string, isNullable = false)
+        val param = KotlinFunctionParam("name", stringType)
+
+        assertEquals("_python_str_to_java_string(name)", PythonHelper.castParam(publicApi, param))
+    }
+
+    @Test
+    fun testCastParamForUserDefinedType() {
+        val publicApi = emptyPublicApi()
+        val userType = KotlinType(ClassName.notNested("com.example.MyClass"), isNullable = false)
+        val param = KotlinFunctionParam("obj", userType)
+
+        assertEquals("obj._jni_ref", PythonHelper.castParam(publicApi, param))
     }
 }
