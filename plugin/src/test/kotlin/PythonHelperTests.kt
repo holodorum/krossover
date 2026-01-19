@@ -10,24 +10,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PythonHelperTests {
-    private fun emptyKotlinLibrary(): KotlinLibrary = KotlinLibrary(
-        classes = hashMapOf(),
-        enums = hashMapOf(),
-        nestedClasses = hashMapOf(),
-        sealedSubclasses = hashSetOf(),
-        externalTypes = emptyList(),
-    )
-
-    private fun emptyPublicApi(): PublicApi = PublicApi(
-        classes = hashMapOf(),
-        sealedSubclasses = emptySet(),
-        enums = hashMapOf(),
-        nestedClasses = hashMapOf(),
-        classHierarchy = ClassHierarchy(emptyKotlinLibrary()),
-        libName = "test",
-        rustConfig = RustConfig("jni", emptyMap()),
-    )
-
     @Test
     fun testNestedClassDefName() {
         val class1 = ClassName.notNested("com.example.Outer\$Inner")
