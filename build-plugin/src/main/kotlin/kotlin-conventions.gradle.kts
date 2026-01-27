@@ -76,7 +76,8 @@ java {
 
 // Configure artifact
 group = "nl.ochagavia.krossover"
-version = "1.0.5-SNAPSHOT"
+val isRelease = project.findProperty("release") == "true"
+version = KrossoverVersion.getVersion(project.rootDir, isRelease)
 
 // Configure java version
 val javaVersion = "11"
